@@ -122,3 +122,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+pytube_downloader/pytube_downloader.build/
