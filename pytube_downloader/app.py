@@ -14,6 +14,7 @@ import pytube
 from pathlib import Path
 from tkinter import messagebox, filedialog
 from pages.downloader_page import DownloadPage
+from pages.concat_page import ConcatPage
 # import ffmpeg
 import os
 
@@ -105,12 +106,11 @@ class App(customtkinter.CTk):
         MAIN_WIDTH, MAIN_HEIGHT = 700, 300
         
         self.main = DownloadPage(master=self,corner_radius=20,bg_color="transparent",fg_color="transparent")
-        self.main.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
+        # self.main.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
         # self.main.grid_columnconfigure(1, weight=0)
-        self.main.grid_columnconfigure((0,1,2,3,4,5), weight=1)
-        self.main.grid_rowconfigure((0, 1), weight=1)
-        self.main.grid_rowconfigure(( 2, 3, 4), weight=0)
-        self.main.create_component()
+        # self.main.grid_columnconfigure((0,1,2,3,4,5), weight=1)
+        # self.main.grid_rowconfigure((0, 1), weight=1)
+        # self.main.grid_rowconfigure(( 2, 3, 4), weight=0)
         self.main.update()
         # self.main.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
         # self.main.grid_columnconfigure(1, weight=0)
@@ -118,12 +118,12 @@ class App(customtkinter.CTk):
         # self.main.grid_rowconfigure((0, 1), weight=1)
         # self.main.grid_rowconfigure(( 2, 3, 4), weight=0)
         
-        self.concat_page = customtkinter.CTkFrame(master=self,width=MAIN_WIDTH,height=MAIN_HEIGHT,corner_radius=20,bg_color="transparent",fg_color="transparent")
-        self.concat_page.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
-        self.concat_page.grid_columnconfigure(1, weight=0)
-        self.concat_page.grid_columnconfigure((2, 3,4,5), weight=1)
-        self.concat_page.grid_rowconfigure((0, 1), weight=1)
-        self.concat_page.grid_rowconfigure(( 2, 3, 4), weight=0)
+        self.concat_page = ConcatPage(master=self,width=MAIN_WIDTH,height=MAIN_HEIGHT,corner_radius=20,bg_color="transparent",fg_color="transparent")
+        # self.concat_page.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
+        # self.concat_page.grid_columnconfigure(1, weight=0)
+        # self.concat_page.grid_columnconfigure((2, 3,4,5), weight=1)
+        # self.concat_page.grid_rowconfigure((0, 1), weight=1)
+        # self.concat_page.grid_rowconfigure(( 2, 3, 4), weight=0)
 
         self.scaling_optionemenu.set("100%")
 
@@ -143,20 +143,12 @@ class App(customtkinter.CTk):
         
     def download_page_button_event(self):
         self.concat_page.grid_forget()
-        self.main.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
-        self.main.grid_columnconfigure(1, weight=0)
-        self.main.grid_columnconfigure((2, 3,4,5), weight=1)
-        self.main.grid_rowconfigure((0, 1), weight=1)
-        self.main.grid_rowconfigure(( 2, 3, 4), weight=0)
+        self.main.show()
         
     def concat_page_button_event(self):
         self.main.grid_forget()
-        self.concat_page.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
-        self.concat_page.grid_columnconfigure(1, weight=0)
-        self.concat_page.grid_columnconfigure((2, 3,4,5), weight=1)
-        self.concat_page.grid_rowconfigure((0, 1), weight=1)
-        self.concat_page.grid_rowconfigure(( 2, 3, 4), weight=0)
-        
+        self.concat_page.show()
+
     # def browse_directory_event(self):
     #     download_director = filedialog.askdirectory(initialdir=self.download_path.get(), title="")
     #     self.download_path.set(download_director)        

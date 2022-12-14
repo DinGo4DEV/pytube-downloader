@@ -7,3 +7,4 @@ pillow
 pytube
 ujson
 requests
+ffmpeg

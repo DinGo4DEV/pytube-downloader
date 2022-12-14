@@ -45,11 +45,15 @@ class DownloadPage(CTkFrame):
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None, border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent", fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None, background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None, overwrite_preferred_drawing_method: Union[str, None] = None, **kwargs):
         super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
 
-        self.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
+        self.show()
         # self.grid_columnconfigure(1, weight=0)
         self.grid_columnconfigure((0,1,2,3,4,5,6), weight=1)
         self.grid_rowconfigure((0, 1), weight=1)
         self.grid_rowconfigure(( 2, 3, 4), weight=0)
+        self.create_component()
+    
+    def show(self):
+        self.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
         
     def create_component(self) -> Any:
         LABEL_COL= 0
