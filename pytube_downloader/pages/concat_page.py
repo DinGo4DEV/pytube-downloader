@@ -11,6 +11,7 @@ import requests
 import ffmpeg
 from tkinter.filedialog import askopenfile,askopenfilenames
 from tkinter import ttk
+import os
         
     # ffmpeg.output(
     #     ffmpeg.input(audio_path),
@@ -38,18 +39,25 @@ class ConcatPage(CTkFrame):
         self.grid(row=0,column=1,columnspan=5,rowspan=4, sticky="NSEW")
 
     def open_files(self):
-        filenames = askopenfilenames(initialdir=self.download_path.get(),typevariable=self.filenames_input)
+        filenames = askopenfilenames(initialdir=self.download_path.get(),typevariable=self.filenames_input)        
         self.filenames = filenames
-        for index,filename in enumerate(filenames):
-            self.tree_view.insert(parent='', index='end', iid=index, text="", values=(filename,), tags=('mp4',))
-            self.tree_view.update_idletasks()
-            self.tree_frame.update_idletasks()
+        if self.filenames:
+            
+            # try:
+            #     self.tree_view.delete("videos")
+            # except:
+            #     print("no videos found")
+            for index,filepath in enumerate(filenames):
+                filename = os.path.basename(filepath)
+                self.tree_view.insert('',index='end', values=(filename,filepath,), tags=('mp4',))
+                self.tree_view.update_idletasks()
+                self.tree_frame.update_idletasks()
         
         
     def create_component(self) -> Any:
         LABEL_COL= 0
         LABEL_SPAN=1
-        TEXT_SPAN =5
+        TEXT_SPAN =4
         self.filenames_input = StringVar()
         ## Destination
         self.download_path = StringVar(value=str(Path(Path.home(),"Downloads")))
@@ -73,6 +81,11 @@ class ConcatPage(CTkFrame):
         self.browse_button.grid(row=0,
                                 column=LABEL_COL+1+TEXT_SPAN,                                
                                 padx=(10, 20), pady=(20, 20),                             
+                                sticky="nsew")
+        self.delete_button = customtkinter.CTkButton(master=self,text="x",command=self.delete)        
+        self.delete_button.grid(row=0,
+                                column=LABEL_COL+1+TEXT_SPAN+1,                                
+                                padx=(10, 20), pady=(20, 20),                             
                                 sticky="nsew")        
 
         self._create_treeview()
@@ -87,19 +100,39 @@ class ConcatPage(CTkFrame):
             background=[('pressed', '!disabled', 'black'), ('active', 'white')]
         )
         ## Treeview Frame
-        self.tree_frame = customtkinter.CTkFrame(self,width=0,height=0,corner_radius=20, bg_color="transparent")
-        self.tree_frame.grid(row=1,pady=20, columnspan=6)
+        self.tree_frame = customtkinter.CTkFrame(self,
+                                                 width=500,
+                                                 height=500,
+                                                 corner_radius=20, 
+                                                 bg_color="transparent")
+        self.tree_frame.grid(row=1,
+                             pady=20, 
+                             padx=20,
+                             columnspan=6)
         # Treeview Scrollbar        
         self.tree_scroll = tkinter.Scrollbar(self.tree_frame)
         self.tree_scroll.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-        self.tree_view = ttk.Treeview(self.tree_frame, 
+        self.tree_view = ttk.Treeview(self.tree_frame, columns=("filename","path"),
+                                      displaycolumns=["filename","path"],
+            height=30,
             yscrollcommand=self.tree_scroll.set,
             selectmode="extended",
+            show='headings',
+            padding=(10,5,20,30)
             # style="TView"
+            
         )
+        self.tree_view.column('filename',width=450,anchor=tkinter.CENTER)        
+        self.tree_view.heading('filename',text='Filename')
+        
+        self.tree_view.column('path',width=850,anchor=tkinter.W,stretch=True)
+        self.tree_view.heading('path',text='Path')
 
         self.tree_view.pack(fill=tkinter.BOTH)
         self.tree_scroll.config(command=self.tree_view.yview())
 
         
-
+    def delete(self):
+        for select in self.tree_view.selection():
+            self.tree_view.delete(select)
+        
