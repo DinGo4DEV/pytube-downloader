@@ -86,9 +86,9 @@ class App(customtkinter.CTk):
         
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="",image=customtkinter.CTkImage(light_image=Image.open("assets/images/pytube_downloader_icon.png"),dark_image=Image.open("assets/images/pytube_downloader_icon.png"),size=(189,189)), font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
-        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, command=self.download_page_button_event)
+        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, command=self.download_page_button_event, text="YT下載")
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
-        self.sidebar_concat_page_2 = customtkinter.CTkButton(self.sidebar_frame, command=self.concat_page_button_event)
+        self.sidebar_concat_page_2 = customtkinter.CTkButton(self.sidebar_frame, command=self.concat_page_button_event, text="合拼影片")
         self.sidebar_concat_page_2.grid(row=2, column=0, padx=20, pady=10)
         self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
         self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))

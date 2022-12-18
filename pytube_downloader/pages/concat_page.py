@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor, wait
+import subprocess
 import threading
 from customtkinter import CTkFrame, StringVar, filedialog
 from pathlib import Path
@@ -89,6 +90,51 @@ class ConcatPage(CTkFrame):
                                 sticky="nsew")        
 
         self._create_treeview()
+        self.output_input = StringVar()
+        self.output_path = StringVar(value=str(Path(Path.home(),"Downloads")))
+        self.output_label = customtkinter.CTkLabel(self,text="Output filename")
+        self.output_label.grid(row=2,
+                            column=LABEL_COL,
+                            columnspan=LABEL_SPAN,
+                            padx=(10, 0), pady=(20, 20), sticky=tkinter.W)
+        self.output_text = customtkinter.CTkEntry(self, textvariable=self.output_input)
+        self.output_text.grid(row=2,
+                              column=LABEL_COL+1,
+                              columnspan=TEXT_SPAN,
+                              padx=(10, 0), pady=(20, 20),
+                              sticky="we"
+                              )
+        self.output_button = customtkinter.CTkButton(master=self,
+                                                     command=self.output,
+                                                     text="output")
+        self.output_button.grid(row=2,
+                                column=LABEL_COL+1+TEXT_SPAN,                                
+                                padx=(10, 20), pady=(20, 20),                             
+                                sticky="nsew")
+        
+        self.destination_label = customtkinter.CTkLabel(self,text="Destination :")
+        self.destination_label.grid(row=3,
+                            column=LABEL_COL,
+                            columnspan=LABEL_SPAN,
+                            padx=(10, 0), pady=(20, 20), sticky=tkinter.W)
+        
+        self.destination_text = customtkinter.CTkEntry(self,
+                                    textvariable=self.output_path,
+                                )
+        self.destination_text.grid(row=3,
+                              column=LABEL_COL+1,
+                              columnspan=TEXT_SPAN,
+                              padx=(10, 0), pady=(20, 20),
+                              sticky="we")
+
+        self.browse_button = customtkinter.CTkButton(master=self,
+                                                     command=self.browse_directory_event,
+                                                     text="Browse")
+        self.browse_button.grid(row=3,
+                                column=LABEL_COL+1+TEXT_SPAN,                                
+                                padx=(10, 0), pady=(20, 20),                             
+                                sticky="nsew")
+        
         return 
 
     def _create_treeview(self) -> Any:
@@ -107,7 +153,7 @@ class ConcatPage(CTkFrame):
                                                  bg_color="transparent")
         self.tree_frame.grid(row=1,
                              pady=20, 
-                             padx=20,
+                             padx=20, 
                              columnspan=6)
         # Treeview Scrollbar        
         self.tree_scroll = tkinter.Scrollbar(self.tree_frame)
@@ -135,4 +181,27 @@ class ConcatPage(CTkFrame):
     def delete(self):
         for select in self.tree_view.selection():
             self.tree_view.delete(select)
+    
+    def output(self):
+        if self.filenames:    
+            with open(Path(self.output_path.get(),"tmp.txt"),"w+",encoding="utf-8") as f:
+                f.writelines('\n'.join(map(lambda filename: f"file '{filename}'",self.filenames)))
+            # ffmpeg_cmd_files = ''.join(map(lambda filename: f' -i "{filename}"', self.filenames))
+            # print(ffmpeg_cmd_files)
+            # 20221210 田夫仔 雞-01
+            print(f'{Path(self.output_path.get(),"tmp.txt").absolute()}')
+            print(f'ffmpeg -safe 0 -f concat -y -i "{Path(self.output_path.get(),"tmp.txt").absolute()}"  -c copy "{str(Path(self.output_path.get(),self.output_input.get()))}.mp4"')            
+            threading.Thread(target=self.check_result).start()
+            
+    def check_result(self):
+        process = subprocess.run(f'ffmpeg -safe 0 -f concat -y -i "{Path(self.output_path.get(),"tmp.txt").absolute()}"  -c copy "{str(Path(self.output_path.get(),self.output_input.get()))}.mp4"',check=True)
+        process.check_returncode()
+        tkinter.messagebox.showinfo(title="Success", message="Concated all files")
+        os.remove(Path(self.output_path.get(),"tmp.txt"))
         
+        
+                        
+        
+    def browse_directory_event(self):
+        output_director = filedialog.askdirectory(initialdir=self.download_path.get(), title="")
+        self.output_path.set(output_director)
