@@ -31,4 +31,4 @@ pip install pytube-downloader
 
 1. install nuitka with pip. `pip install nuitka`
 2. cd to pytube_downloader
-3. `C:\Users\{username}\AppData\Local\Programs\Python\Python310\python.exe -m nuitka --follow-imports --windows-icon-from-ico=icon.png .\pytube_downloader.py`
+3. `C:\Users\{username}\AppData\Local\Programs\Python\Python310\python.exe -m nuitka --follow-imports --enable-plugin=tk-inter --enable-plugin=numpy --include-package=customtkinter  --windows-icon-from-ico=assets\images\pytube_downloader_icon.png --windows-company-name=devhk --windows-product-name="pytube-downloader" --windows-product-version=0001 --standalone .\pytube_downloader.py`
