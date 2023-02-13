@@ -124,3 +124,5 @@ dmypy.json
 .pyre/
 
 pytube_downloader/pytube_downloader.build/
+
+pytube_downloader/pytube_downloader.dist/
