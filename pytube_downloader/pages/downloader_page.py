@@ -9,36 +9,70 @@ import tkinter
 from typing import Optional, Union,Tuple, Any
 import requests
 import validators
+import subprocess
+import pathlib
+import sys
+import os
 
 def get_thumbnails(data):
     key,thumbnail_url = data
     raw = requests.get(thumbnail_url,stream=True).raw
     return (key,raw)
 
+def on_progress(vid, chunk, bytes_remaining):
+        total_size = vid.filesize        
+        bytes_downloaded = total_size - bytes_remaining
+        percentage_of_completion = bytes_downloaded / total_size * 100
+        totalsz = (total_size/1024)/1024
+        totalsz = round(totalsz,1)
+        remain = (bytes_remaining / 1024) / 1024
+        remain = round(remain, 1)
+        dwnd = (bytes_downloaded / 1024) / 1024
+        dwnd = round(dwnd, 1)
+        percentage_of_completion = round(percentage_of_completion,2)
+
+        #print(f'Total Size: {totalsz} MB')
+        print(f'{vid.default_filename} Download Progress: {percentage_of_completion}%, Total Size:{totalsz} MB, Downloaded: {dwnd} MB, Remaining:{remain} MB')
+
 def _download_1080_video(video:pytube.YouTube,directory):
+    video.register_on_progress_callback(on_progress)
     return video.streams.filter(res="1080p", progressive=False).first().download(directory,max_retries=3,skip_existing=True)
 
+def _download_best_video(video:pytube.YouTube,directory):
+    video.register_on_progress_callback(on_progress)
+    return (video.streams.filter(res="2160p", progressive=False) or video.streams.filter(res="1440p") or  video.streams.filter(res="1080p", progressive=False)).first().download(directory,max_retries=3,skip_existing=True)    
+
 def _download_1080_audio(video:pytube.YouTube,directory):
-    return video.streams.filter(abr="160kbps", progressive=False).first().download(directory,max_retries=3,skip_existing=True)
+    return video.streams.filter(abr="160kbps", progressive=False).first().download(directory,max_retries=3,skip_existing=True,filename_prefix="audio-")
 
 def download_yt(video: pytube.YouTube,yt_type,directory):                
     with ThreadPoolExecutor() as exc:
         audio_path_future = exc.submit(_download_1080_audio,video,directory)
-        video_path_future = exc.submit(_download_1080_video,video,directory)
+        if yt_type == "mp4/1080":
+            video_path_future = exc.submit(_download_1080_video,video,directory)
+        else:
+            video_path_future = exc.submit(_download_best_video,video,directory)
         done, not_complete  = wait([audio_path_future,video_path_future])
         video_path = video_path_future.result()
         audio_path = audio_path_future.result()
+        # print(video_path)
+        # print(audio_path)
+    
+    if yt_type != "mp4/1080":
+        print(f"ffmpeg -i \"{video_path}\" -i \"{audio_path}\" -c:v copy \"{video_path.split('.')[0]}.mp4\"")
+        process = subprocess.run(f"ffmpeg -i \"{video_path}\" -i \"{audio_path}\" -c:v copy \"{video_path.split('.')[0]}.mp4\"")
+        process.check_returncode()
+        os.remove(video_path)
+        os.remove(audio_path)
+        # ffmpeg.output(
+        #     ffmpeg.input(audio_path),
+        #     ffmpeg.input(video_path),
+        #     video_path.replace("temp_","")
+        # ).run(overwrite_output=True)
+        # import os
         
-    # ffmpeg.output(
-    #     ffmpeg.input(audio_path),
-    #     ffmpeg.input(video_path),
-    #     video_path.replace("temp_","")
-    # ).run(overwrite_output=True)
-    # import os
-    # os.remove(video_path)
-    # os.remove(audio_path)
-    # video_stream = video.streams.filter(file_extension="mp4",only_audio=True if "audio" in yt_type else False)\
-    #     .get_highest_resolution()
+        # video_stream = video.streams.filter(file_extension="mp4",only_audio=True if "audio" in yt_type else False)\
+        #     .get_highest_resolution()
 
     # video_stream.download(directory,max_retries=3,skip_existing=True)
 class DownloadPage(CTkFrame):
@@ -97,6 +131,7 @@ class DownloadPage(CTkFrame):
                               sticky="nsew")
         YT_TYPE_OPTIONS = [
             "mp4/best",
+            "mp4/1080",
             "audio/best",            
         ]
         self.yt_type_var = customtkinter.StringVar(value=YT_TYPE_OPTIONS[0])
@@ -168,7 +203,7 @@ class DownloadPage(CTkFrame):
     def donwload(self):
         tasks = {}
         directory = self.download_path.get()
-        yt_type = self.yt_type_var.get()        
+        yt_type = self.yt_type_var.get()
         with ThreadPoolExecutor() as exc:            
             for v in self.yt_videos.values():
                 future = exc.submit(download_yt,v,yt_type,directory)
@@ -177,3 +212,6 @@ class DownloadPage(CTkFrame):
                 
         wait(tasks.keys())
         tkinter.messagebox.showinfo(title="Success", message="Donwloaded all files")
+        
+    
+    
